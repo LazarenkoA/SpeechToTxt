@@ -146,18 +146,19 @@ func (s *STT) SpeechKit(out chan string) error {
 }
 
 func (s *STT) deleteFile() {
-	d, err := s.s3.DeleteObject(&s3.DeleteObjectInput{
+	s.s3.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(s.conf.Bucket),
 		Key:    aws.String(s.oggKey),
 	})
-	fmt.Println(d, err)
 }
 
 func (s *STT) observe(operationID string, out chan string) {
 	t := time.NewTicker(time.Millisecond * 500)
 	defer t.Stop()
-	defer close(out)
-	defer s.deleteFile()
+	defer func() {
+		s.deleteFile()
+		close(out)
+	}()
 
 	timeout := time.After(time.Minute)
 FOR:
