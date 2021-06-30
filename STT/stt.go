@@ -42,6 +42,18 @@ const (
 
 func (s *STT) New(conf *STTConf) *STT {
 	s.conf = conf
+	if conf.Apikey == "" {
+		panic("не заполнен Apikey")
+	}
+	if conf.Key == "" {
+		panic("не заполнен Key")
+	}
+	if conf.ID_apikey == "" {
+		panic("не заполнен ID_apikey")
+	}
+	if conf.Bucket == "" {
+		panic("не заполнен Bucket")
+	}
 
 	return s
 }
@@ -124,7 +136,7 @@ func (s *STT) SpeechKit(out chan string) error {
 		return err
 	}
 
-	s.observe(request["id"].(string), out)
+	go s.observe(request["id"].(string), out)
 
 	return nil
 }
@@ -132,6 +144,7 @@ func (s *STT) SpeechKit(out chan string) error {
 func (s *STT) observe(operationID string, out chan string) {
 	t := time.NewTicker(time.Millisecond * 500)
 	defer t.Stop()
+	defer close(out)
 
 	timeout := time.After(time.Minute)
 FOR:

@@ -30,7 +30,13 @@ func main() {
 
 	out := make(chan string, 1)
 	if err := sst.UploadStorageYandexcloud("C:/GoProject/telegramScheduleSendMsg/tmp.ogg"); err == nil {
-		sst.SpeechKit(out)
+		if err = sst.SpeechKit(out); err != nil {
+			close(out)
+			fmt.Println(err)
+		}
+	} else {
+		fmt.Println(err)
+		close(out)
 	}
 	fmt.Println(<-out)
 }
