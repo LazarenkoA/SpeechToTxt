@@ -21,7 +21,7 @@ func init() {
 }
 
 func main() {
-	sst := new(stt.STT).New(&stt.STTConf{
+	sttObj := new(stt.STT).New(&stt.STTConf{
 		Key:       key,
 		ID_apikey: ID_apikey,
 		Apikey:    apikey,
@@ -29,8 +29,8 @@ func main() {
 	})
 
 	out := make(chan string, 1)
-	if err := sst.UploadStorageYandexcloud("C:/GoProject/telegramScheduleSendMsg/tmp.ogg"); err == nil {
-		if err = sst.SpeechKit(out); err != nil {
+	if err := sttObj.UploadStorageYandexcloud("C:/GoProject/telegramScheduleSendMsg/tmp.ogg"); err == nil {
+		if err = sttObj.SpeechKit(out); err != nil {
 			close(out)
 			fmt.Println(err)
 		}
