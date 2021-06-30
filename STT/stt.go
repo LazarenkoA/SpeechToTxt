@@ -15,7 +15,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"time"
 )
@@ -66,7 +65,8 @@ func (s *STT) UploadStorageYandexcloud(filePath string) error {
 	if err != nil {
 		return errors.Wrap(err, "ошибка чтения файла")
 	}
-	_, filename := path.Split(filePath)
+
+	_, filename := splitPath(filePath)
 	key := fmt.Sprintf("%s-%s", uuid.New().String(), filename)
 
 	sess, err := session.NewSession(&aws.Config{
@@ -246,4 +246,9 @@ func (s *STT) get(url string) (*http.Response, error) {
 	} else {
 		return resp, nil
 	}
+}
+
+func splitPath(path string) (dir, file string) {
+	i := strings.LastIndex(path, string(os.PathSeparator))
+	return path[:i+1], path[i+1:]
 }
