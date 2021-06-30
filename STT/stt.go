@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -34,6 +36,7 @@ type STTConf struct {
 type STT struct {
 	conf   *STTConf
 	oggKey string
+	s3     s3iface.S3API
 }
 
 const (
@@ -84,6 +87,7 @@ func (s *STT) UploadStorageYandexcloud(filePath string) error {
 		return err
 	}
 
+	s.s3 = uploader.S3
 	// пример получения списка файлов
 	//tr, err := uploader.S3.ListObjects(&s3.ListObjectsInput{
 	//	Bucket: aws.String(bucket),
@@ -141,10 +145,18 @@ func (s *STT) SpeechKit(out chan string) error {
 	return nil
 }
 
+func (s *STT) deleteFile() {
+	s.s3.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(s.conf.Bucket),
+		Key:    aws.String(s.oggKey),
+	})
+}
+
 func (s *STT) observe(operationID string, out chan string) {
 	t := time.NewTicker(time.Millisecond * 500)
 	defer t.Stop()
 	defer close(out)
+	defer s.deleteFile()
 
 	timeout := time.After(time.Minute)
 FOR:
