@@ -155,10 +155,7 @@ func (s *STT) deleteFile() {
 func (s *STT) observe(operationID string, out chan string) {
 	t := time.NewTicker(time.Millisecond * 500)
 	defer t.Stop()
-	defer func() {
-		s.deleteFile()
-		close(out)
-	}()
+	defer close(out)
 
 	timeout := time.After(time.Minute)
 FOR:
@@ -199,6 +196,7 @@ FOR:
 						}
 					}
 
+					s.deleteFile()
 					out <- strings.Join(result, ". ")
 				}()
 				break FOR
