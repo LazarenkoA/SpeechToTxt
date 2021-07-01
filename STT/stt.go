@@ -30,6 +30,9 @@ type STTConf struct {
 	Apikey string
 
 	Bucket string
+
+	// таймаут на распознавание, по дефолту минута
+	TimeOut time.Duration
 }
 
 type STT struct {
@@ -157,7 +160,11 @@ func (s *STT) observe(operationID string, out chan string) {
 	defer t.Stop()
 	defer close(out)
 
-	timeout := time.After(time.Minute)
+	if s.conf.TimeOut == 0 {
+		s.conf.TimeOut = time.Minute
+	}
+
+	timeout := time.After(s.conf.TimeOut)
 FOR:
 	for {
 		select {
